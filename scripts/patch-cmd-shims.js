@@ -17,3 +17,16 @@ if (fs.existsSync(binDir)) {
     }
   }
 }
+
+// Patch Nest CLI start.action.js if present to support paths containing '&' under Windows shell mode
+const startActionPath = path.resolve(__dirname, '..', 'node_modules', '@nestjs', 'cli', 'actions', 'start.action.js');
+if (fs.existsSync(startActionPath)) {
+  let content = fs.readFileSync(startActionPath, 'utf8');
+  if (content.includes("outputFilePath.indexOf(' ') >= 0") && !content.includes("outputFilePath.indexOf('&') >= 0")) {
+    content = content.replace(
+      "outputFilePath.indexOf(' ') >= 0",
+      "(outputFilePath.indexOf(' ') >= 0 || outputFilePath.indexOf('&') >= 0)"
+    );
+    fs.writeFileSync(startActionPath, content, 'utf8');
+  }
+}
